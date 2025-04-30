@@ -19,8 +19,10 @@
         }
 
         .white-key {
-            width: 40px;
-            height: 200px;
+            width: calc(40px * 0.9);
+            /* Giảm kích thước phím trắng */
+            height: calc(200px * 0.9);
+            /* Giảm chiều cao phím trắng */
             background: white;
             border: 1px solid black;
             display: inline-block;
@@ -34,8 +36,10 @@
         }
 
         .black-key {
-            width: 25px;
-            height: 120px;
+            width: calc(25px * 0.9);
+            /* Giảm kích thước phím đen */
+            height: calc(120px * 0.9);
+            /* Giảm chiều cao phím đen */
             background: black;
             position: absolute;
             top: 0;
@@ -46,6 +50,7 @@
         .black-key:active {
             background-color: #444;
         }
+
 
         #status {
             margin-top: 20px;
@@ -176,7 +181,8 @@
                     const blackKey = document.createElement('div');
                     blackKey.className = 'black-key';
                     blackKey.dataset.note = blackNote;
-                    blackKey.style.left = `${whiteKeyCount * 40 + 30}px`;
+                    // Điều chỉnh vị trí của phím đen
+                    blackKey.style.left = `calc(${whiteKeyCount * 40 + 30}px * 0.9)`; // Cộng thêm 30px cho phím đen
                     piano.appendChild(blackKey);
                     allNotes.push(blackNote);
                 }
@@ -185,11 +191,13 @@
             }
         }
 
+        // Cập nhật phím C7
         const c7Key = document.createElement('div');
         c7Key.className = 'white-key';
         c7Key.dataset.note = 'C7';
         piano.appendChild(c7Key);
         allNotes.push('C7');
+
 
         function getNormalizedGain(note) {
             const octave = parseInt(note.slice(-1));
