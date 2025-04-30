@@ -1,0 +1,44 @@
+<!-- Form chọn nốt -->
+<input type="text" id="start-note" placeholder="Start note (e.g. C4)">
+<input type="text" id="end-note" placeholder="End note (e.g. C5)">
+<select id="note-type">
+    <option value="all">All Notes</option>
+    <option value="white">White Notes</option>
+    <option value="black">Black Notes</option>
+</select>
+<button id="submit-range">Submit</button>
+
+<script>
+    document.getElementById('submit-range').addEventListener('click', function () {
+        const startNote = document.getElementById('start-note').value.trim();
+        const endNote = document.getElementById('end-note').value.trim();
+        const noteType = document.getElementById('note-type').value;
+
+        if (startNote && endNote) {
+            if (isValidNote(startNote) && isValidNote(endNote)) {
+                // Lưu dữ liệu vào localStorage
+                localStorage.setItem('startNote', startNote);
+                localStorage.setItem('endNote', endNote);
+                localStorage.setItem('noteType', noteType);
+
+                // Chuyển sang trang quiz
+                window.location.href = 'quiz.html';
+            } else {
+                alert('Một hoặc cả hai nốt không hợp lệ!');
+            }
+        } else {
+            alert('Vui lòng nhập đủ cả nốt bắt đầu và kết thúc!');
+        }
+    });
+
+    function isValidNote(note) {
+        const validNotes = [
+            "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+            "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+            "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+            "C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
+            "C7"
+        ];
+        return validNotes.includes(note.trim().toUpperCase());
+    }
+</script>

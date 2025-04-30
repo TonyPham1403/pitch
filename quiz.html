@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>🎵 Trắc Nghiệm Cảm Âm</title>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .piano {
+            position: relative;
+            width: fit-content;
+            margin: 20px auto;
+        }
+
+        .white-key {
+            width: 40px;
+            height: 200px;
+            background: white;
+            border: 1px solid black;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .white-key:active {
+            background-color: #ddd;
+        }
+
+        .black-key {
+            width: 25px;
+            height: 120px;
+            background: black;
+            position: absolute;
+            top: 0;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .black-key:active {
+            background-color: #444;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        #start-btn,
+        #repeat-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px 10px;
+        }
+
+        #start-btn:hover,
+        #repeat-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #repeat-btn {
+            display: none;
+        }
+
+        .note-label {
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        #prev-btn,
+        #next-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        #prev-btn:hover,
+        #next-btn:hover {
+            background-color: #5a6268;
+        }
+
+        #prev-btn,
+        #next-btn {
+            display: none;
+        }
+
+        /* 🎯 Thêm xử lý xoay màn hình */
+        #rotate-notice {
+            display: none;
+            padding: 30px;
+            font-size: 20px;
+            color: red;
+            background-color: #fff3cd;
+        }
+
+        @media screen and (orientation: portrait) {
+            #rotate-notice {
+                display: block;
+            }
+
+            #main-content {
+                display: none;
+            }
+        }
+
+        @media screen and (orientation: landscape) {
+            #rotate-notice {
+                display: none;
+            }
+
+            #main-content {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="rotate-notice">📱 Vui lòng xoay ngang màn hình để sử dụng ứng dụng!</div>
+
+    <div id="main-content">
+        <h1>🎹 Trắc Nghiệm Cảm Âm</h1>
+        <div id="score-display">Điểm: 0 / 0 (0%)</div>
+        <div id="status"></div>
+
+        <button id="start-btn">🎧 Bắt đầu</button>
+        <button id="prev-btn">⬅️ Prev</button>
+        <button id="next-btn">➡️ Next</button>
+
+        <button id="repeat-btn">🔁 Repeat</button>
+        <div class="piano" id="piano" style="display: none;"></div>
+        <div id="status">...</div>
+    </div>
+
+    <script>
+        const gain = new Tone.Gain().toDestination();
+        const synth = new Tone.Synth().connect(gain);
+        const piano = document.getElementById('piano');
+        const startBtn = document.getElementById('start-btn');
+        const repeatBtn = document.getElementById('repeat-btn');
+        const whiteNotesOrder = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const blackNoteMap = { 'C': 'C#', 'D': 'D#', 'F': 'F#', 'G': 'G#', 'A': 'A#' };
+        const startOctave = 3;
+        const endOctave = 6;
+        const allNotes = [];
+        let currentNote = "";
+        const questionHistory = [];
+        let currentIndex = -1; // chỉ số trong lịch sử
+        let whiteKeyCount = 0;
+        let score = 0;
+        let hasAnsweredCurrentQuestion = false;
+
+
+
+        // Lấy startNote và endNote từ localStorage
+        const startNote = localStorage.getItem('startNote');
+        const endNote = localStorage.getItem('endNote');
+
+        // Mảng các nốt hợp lệ theo thứ tự
+        const validNotes = [
+            "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+            "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+            "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+            "C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
+            "C7"
+        ];
+
+        // Kiểm tra và cắt mảng theo startNote - endNote
+        let allowedNotes = validNotes;
+        if (startNote && endNote) {
+            const startIndex = validNotes.indexOf(startNote);
+            const endIndex = validNotes.indexOf(endNote);
+            if (startIndex !== -1 && endIndex !== -1 && startIndex <= endIndex) {
+                allowedNotes = validNotes.slice(startIndex, endIndex + 1);
+            } else {
+                alert("Khoảng nốt không hợp lệ! Vui lòng quay lại chọn lại.");
+                window.location.href = 'index.html';
+            }
+        }
+
+        for (let octave = startOctave; octave <= endOctave; octave++) {
+            for (let i = 0; i < whiteNotesOrder.length; i++) {
+                const whiteNote = whiteNotesOrder[i] + octave;
+                const whiteKey = document.createElement('div');
+                whiteKey.className = 'white-key';
+                whiteKey.dataset.note = whiteNote;
+                piano.appendChild(whiteKey);
+                allNotes.push(whiteNote);
+
+                const baseNote = whiteNotesOrder[i];
+                const blackNoteName = blackNoteMap[baseNote];
+                if (blackNoteName) {
+                    const blackNote = blackNoteName + octave;
+                    const blackKey = document.createElement('div');
+                    blackKey.className = 'black-key';
+                    blackKey.dataset.note = blackNote;
+                    blackKey.style.left = `${whiteKeyCount * 40 + 30}px`;
+                    piano.appendChild(blackKey);
+                    allNotes.push(blackNote);
+                }
+
+                whiteKeyCount++;
+            }
+        }
+
+        const c7Key = document.createElement('div');
+        c7Key.className = 'white-key';
+        c7Key.dataset.note = 'C7';
+        piano.appendChild(c7Key);
+        allNotes.push('C7');
+
+        function getNormalizedGain(note) {
+            const octave = parseInt(note.slice(-1));
+            if (octave === 3) return 10.5;
+            if (octave === 4) return 8.5;
+            if (octave === 5) return 5.0;
+            return 3.7;
+        }
+
+        async function playNewQuestion() {
+            // Xóa tất cả label nốt cũ
+            document.querySelectorAll('.note-label').forEach(label => label.remove());
+
+            const startNote = localStorage.getItem('startNote');
+            const endNote = localStorage.getItem('endNote');
+            const noteType = localStorage.getItem('noteType'); // Lấy loại nốt từ localStorage
+
+            const validNotes = [
+                "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
+                "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
+                "C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
+                "C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
+                "C7"
+            ];
+
+            let filteredNotes = allNotes;
+
+            if (startNote && endNote) {
+                const startIndex = validNotes.indexOf(startNote);
+                const endIndex = validNotes.indexOf(endNote);
+
+                if (startIndex !== -1 && endIndex !== -1 && startIndex <= endIndex) {
+                    const allowedSet = new Set(validNotes.slice(startIndex, endIndex + 1));
+
+                    // Lọc theo loại nốt
+                    filteredNotes = allNotes.filter(note =>
+                        allowedSet.has(note) &&
+                        (noteType === 'all' ||
+                            (noteType === 'white' && !note.includes('#')) ||
+                            (noteType === 'black' && note.includes('#')))
+                    );
+                } else {
+                    alert("Khoảng nốt không hợp lệ! Vui lòng quay lại chọn lại.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+            }
+
+            const randomIndex = Math.floor(Math.random() * filteredNotes.length);
+            const newNote = filteredNotes[randomIndex];
+
+            if (currentIndex === questionHistory.length - 1) {
+                questionHistory.push(newNote);
+                currentIndex++;
+            } else {
+                questionHistory.splice(currentIndex + 1);
+                questionHistory.push(newNote);
+                currentIndex++;
+            }
+
+            playCurrentNote();
+            updateNavButtons();
+        }
+
+
+
+        function playCurrentNote() {
+            currentNote = questionHistory[currentIndex];
+            gain.gain.value = getNormalizedGain(currentNote);
+            synth.triggerAttackRelease(currentNote, "8n");
+
+            hasAnsweredCurrentQuestion = false;  // Reset cờ cho câu hỏi mới
+
+            document.getElementById("status").textContent = `🎧 Câu ${currentIndex + 1}: Đoán xem nốt nào đang được phát...`;
+        }
+        document.querySelectorAll('.white-key, .black-key').forEach(key => {
+            key.addEventListener('click', () => {
+                const selectedNote = key.dataset.note;
+                handleAnswer(selectedNote);
+            });
+        });
+        function handleAnswer(selectedNote) {
+            if (hasAnsweredCurrentQuestion) return;
+
+            const totalPlayed = currentIndex + 1;
+
+            if (selectedNote === currentNote) {
+                score++;
+                document.getElementById("status").textContent = `✅ Đúng rồi! Nốt là ${currentNote} 🎉`;
+            } else {
+                document.getElementById("status").textContent = `❌ Sai rồi. Nốt đúng là ${currentNote}`;
+            }
+
+            const percentage = Math.round((score / totalPlayed) * 100);
+            document.getElementById("score-display").textContent = `Điểm: ${score} / ${totalPlayed} (${percentage}%)`;
+
+            hasAnsweredCurrentQuestion = true;
+        }
+
+
+
+
+        function repeatCurrentNote() {
+            if (currentNote) {
+                gain.gain.value = getNormalizedGain(currentNote);
+                synth.triggerAttackRelease(currentNote, "8n");
+                document.getElementById("status").textContent = "🔁 Đã lặp lại nốt!";
+            }
+        }
+
+
+        piano.addEventListener('click', async (e) => {
+            const note = e.target.dataset.note;
+            if (note) {
+                gain.gain.value = getNormalizedGain(note);
+                synth.triggerAttackRelease(note, "8n");
+
+                if (note === currentNote) {
+                    document.getElementById("status").textContent = `✅ Chính xác! Đó là: ${note}`;
+
+                    // Hiển thị tên nốt ngay trên phím đàn
+                    if (!e.target.querySelector('.note-label')) {
+                        const label = document.createElement('div');
+                        label.textContent = note;
+                        label.className = 'note-label';
+                        label.style.position = 'absolute';
+                        label.style.bottom = '5px'; // hiển thị dưới chân phím
+                        label.style.left = '50%';
+                        label.style.transform = 'translateX(-50%)';
+                        label.style.fontSize = '12px';
+                        label.style.fontWeight = 'bold';
+                        label.style.pointerEvents = 'none';
+
+                        // Màu chữ và căn chỉnh theo loại phím
+                        const isBlack = e.target.classList.contains('black-key');
+                        label.style.color = isBlack ? '#fff' : '#000';
+
+
+                        e.target.appendChild(label);
+                    }
+
+                    setTimeout(playNewQuestion, 1000);
+                } else {
+                    document.getElementById("status").textContent = "❌ Sai rồi, thử lại!";
+                }
+
+            }
+        });
+
+        startBtn.addEventListener('click', async () => {
+            document.getElementById('prev-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'inline-block';
+
+            await Tone.start(); // Khởi động âm thanh
+            startBtn.style.display = 'none';
+            piano.style.display = 'block';
+            repeatBtn.style.display = 'inline-block';
+            playNewQuestion();
+        });
+
+        repeatBtn.addEventListener('click', () => {
+            repeatCurrentNote();
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                playCurrentNote();
+                updateNavButtons();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentIndex < questionHistory.length - 1) {
+                currentIndex++;
+                playCurrentNote();
+                updateNavButtons();
+            }
+        });
+
+        function updateNavButtons() {
+            document.getElementById('prev-btn').style.display = currentIndex > 0 ? 'inline-block' : 'none';
+            document.getElementById('next-btn').style.display = currentIndex < questionHistory.length - 1 ? 'inline-block' : 'none';
+        }
+
+    </script>
+</body>
+
+</html>
