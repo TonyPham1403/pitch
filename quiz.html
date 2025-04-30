@@ -80,8 +80,16 @@
 
         .note-label {
             font-weight: bold;
+            font-size: 12px;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
             pointer-events: none;
+            z-index: 3;
+            /* Đảm bảo nhãn không bị phím đen đè */
         }
+
 
         #prev-btn,
         #next-btn {
@@ -116,7 +124,7 @@
     <button id="next-btn">➡️ Next</button>
 
     <button id="repeat-btn">🔁 Repeat</button>
-    <div class="piano" id="piano" style="display: none;"></div>
+    <div class="piano" id="piano"></div>
     <div id="status">...</div>
 
     <script>
@@ -171,6 +179,21 @@
                 const whiteKey = document.createElement('div');
                 whiteKey.className = 'white-key';
                 whiteKey.dataset.note = whiteNote;
+
+                // Tạo nhãn cho phím trắng và cho nó vào trong phím trắng
+                const whiteKeyLabel = document.createElement('div');
+                whiteKeyLabel.textContent = whiteNote;
+                whiteKeyLabel.className = 'note-label';
+                whiteKeyLabel.style.position = 'absolute';
+                whiteKeyLabel.style.bottom = '5px';
+                whiteKeyLabel.style.left = '50%';
+                whiteKeyLabel.style.transform = 'translateX(-50%)';
+                whiteKeyLabel.style.fontSize = '12px';  // Điều chỉnh kích thước nếu cần
+                whiteKeyLabel.style.fontWeight = 'bold';
+                whiteKeyLabel.style.pointerEvents = 'none';
+                whiteKeyLabel.style.color = '#000'; // Màu cho phím trắng
+
+                whiteKey.appendChild(whiteKeyLabel); // Gắn nhãn vào phím trắng
                 piano.appendChild(whiteKey);
                 allNotes.push(whiteNote);
 
@@ -181,8 +204,23 @@
                     const blackKey = document.createElement('div');
                     blackKey.className = 'black-key';
                     blackKey.dataset.note = blackNote;
-                    // Điều chỉnh vị trí của phím đen
-                    blackKey.style.left = `calc(${whiteKeyCount * 40 + 30}px * 0.83)`; // Cộng thêm 30px cho phím đen
+
+                    blackKey.style.left = `calc(${whiteKeyCount * 40 + 30}px * 0.83)`; // Tính toán vị trí phím đen
+
+                    // Tạo nhãn cho phím đen và cho nó vào trong phím đen
+                    const blackKeyLabel = document.createElement('div');
+                    blackKeyLabel.textContent = blackNote;
+                    blackKeyLabel.className = 'note-label';
+                    blackKeyLabel.style.position = 'absolute';
+                    blackKeyLabel.style.bottom = '5px';
+                    blackKeyLabel.style.left = '50%';
+                    blackKeyLabel.style.transform = 'translateX(-50%)';
+                    blackKeyLabel.style.fontSize = '12px';
+                    blackKeyLabel.style.fontWeight = 'bold';
+                    blackKeyLabel.style.pointerEvents = 'none';
+                    blackKeyLabel.style.color = '#fff'; // Màu cho phím đen
+
+                    blackKey.appendChild(blackKeyLabel); // Gắn nhãn vào phím đen
                     piano.appendChild(blackKey);
                     allNotes.push(blackNote);
                 }
@@ -191,12 +229,30 @@
             }
         }
 
-        // Cập nhật phím C7
+
+        // Tạo và thêm phím C7
         const c7Key = document.createElement('div');
         c7Key.className = 'white-key';
         c7Key.dataset.note = 'C7';
+
+        const c7Label = document.createElement('div');
+        c7Label.textContent = 'C7';
+        c7Label.className = 'note-label';
+        c7Label.style.position = 'absolute';
+        c7Label.style.bottom = '5px';
+        c7Label.style.left = '50%';
+        c7Label.style.transform = 'translateX(-50%)';
+        c7Label.style.fontSize = '12px';
+        c7Label.style.fontWeight = 'bold';
+        c7Label.style.pointerEvents = 'none';
+        c7Label.style.color = '#000'; // Màu cho phím trắng
+
+        c7Key.appendChild(c7Label);
         piano.appendChild(c7Key);
         allNotes.push('C7');
+
+
+
 
 
         function getNormalizedGain(note) {
@@ -209,7 +265,7 @@
 
         async function playNewQuestion() {
             // Xóa tất cả label nốt cũ
-            document.querySelectorAll('.note-label').forEach(label => label.remove());
+            //document.querySelectorAll('.note-label').forEach(label => label.remove());
 
             const startNote = localStorage.getItem('startNote');
             const endNote = localStorage.getItem('endNote');
