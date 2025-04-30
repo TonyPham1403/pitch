@@ -19,9 +19,9 @@
         }
 
         .white-key {
-            width: calc(40px * 0.845);
+            width: calc(40px * 0.84);
             /* Giảm kích thước phím trắng */
-            height: calc(200px * 0.845);
+            height: calc(200px * 0.84);
             /* Giảm chiều cao phím trắng */
             background: white;
             border: 1px solid black;
@@ -36,9 +36,9 @@
         }
 
         .black-key {
-            width: calc(25px * 0.845);
+            width: calc(25px * 0.84);
             /* Giảm kích thước phím đen */
-            height: calc(120px * 0.845);
+            height: calc(120px * 0.84);
             /* Giảm chiều cao phím đen */
             background: black;
             position: absolute;
@@ -182,7 +182,7 @@
                     blackKey.className = 'black-key';
                     blackKey.dataset.note = blackNote;
                     // Điều chỉnh vị trí của phím đen
-                    blackKey.style.left = `calc(${whiteKeyCount * 40 + 30}px * 0.845)`; // Cộng thêm 30px cho phím đen
+                    blackKey.style.left = `calc(${whiteKeyCount * 40 + 30}px * 0.84)`; // Cộng thêm 30px cho phím đen
                     piano.appendChild(blackKey);
                     allNotes.push(blackNote);
                 }
