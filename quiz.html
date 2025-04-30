@@ -3,8 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>🎵 Trắc Nghiệm Cảm Âm</title>
     <script src="https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.min.js"></script>
     <style>
@@ -12,10 +10,6 @@
             text-align: center;
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            /* Ngăn không cho bị cuộn khi xoay màn hình */
         }
 
         .piano {
@@ -104,68 +98,21 @@
         #next-btn {
             display: none;
         }
-
-        /* 🔄 Tự động xoay sang chế độ landscape khi ở portrait */
-        @media screen and (orientation: portrait) {
-
-            html,
-            body {
-                width: 100vh;
-                height: 100vw;
-                overflow: hidden;
-            }
-
-            #main-content {
-                transform: rotate(90deg) translateY(-100%);
-                transform-origin: left top;
-                width: 100vw;
-                height: 100vh;
-                position: absolute;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                overflow: hidden;
-            }
-        }
-
-        @media screen and (orientation: landscape) {
-
-            html,
-            body {
-                width: 100vw;
-                height: 100vh;
-                overflow: hidden;
-            }
-
-            #main-content {
-                transform: none;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                width: 100vw;
-                height: 100vh;
-            }
-        }
     </style>
 </head>
 
 <body>
+    <h1>🎹 Trắc Nghiệm Cảm Âm</h1>
+    <div id="score-display">Điểm: 0 / 0 (0%)</div>
+    <div id="status"></div>
 
-    <div id="main-content">
-        <h1>🎹 Trắc Nghiệm Cảm Âm</h1>
-        <div id="score-display">Điểm: 0 / 0 (0%)</div>
-        <div id="status"></div>
+    <button id="start-btn">🎧 Bắt đầu</button>
+    <button id="prev-btn">⬅️ Prev</button>
+    <button id="next-btn">➡️ Next</button>
 
-        <button id="start-btn">🎧 Bắt đầu</button>
-        <button id="prev-btn">⬅️ Prev</button>
-        <button id="next-btn">➡️ Next</button>
-
-        <button id="repeat-btn">🔁 Repeat</button>
-        <div class="piano" id="piano" style="display: none;"></div>
-        <div id="status">...</div>
-    </div>
+    <button id="repeat-btn">🔁 Repeat</button>
+    <div class="piano" id="piano" style="display: none;"></div>
+    <div id="status">...</div>
 
     <script>
         const gain = new Tone.Gain().toDestination();
