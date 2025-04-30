@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>🎵 Trắc Nghiệm Cảm Âm</title>
     <script src="https://cdn.jsdelivr.net/npm/tone@14.8.39/build/Tone.min.js"></script>
     <style>
@@ -10,6 +12,8 @@
             text-align: center;
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }
 
         .piano {
@@ -99,39 +103,41 @@
             display: none;
         }
 
-        /* 🎯 Thêm xử lý xoay màn hình */
-        #rotate-notice {
-            display: none;
-            padding: 30px;
-            font-size: 20px;
-            color: red;
-            background-color: #fff3cd;
-        }
-
+        /* 🔄 Tự động xoay landscape khi ở portrait */
         @media screen and (orientation: portrait) {
-            #rotate-notice {
-                display: block;
+
+            html,
+            body {
+                width: 100vh;
+                height: 100vw;
+                overflow: hidden;
             }
 
             #main-content {
-                display: none;
+                transform: rotate(90deg) translateY(-100%);
+                transform-origin: left top;
+                width: 100vw;
+                height: 100vh;
+                position: absolute;
             }
         }
 
         @media screen and (orientation: landscape) {
-            #rotate-notice {
-                display: none;
+
+            html,
+            body {
+                width: 100vw;
+                height: 100vh;
             }
 
             #main-content {
-                display: block;
+                transform: none;
             }
         }
     </style>
 </head>
 
 <body>
-    <div id="rotate-notice">📱 Vui lòng xoay ngang màn hình để sử dụng ứng dụng!</div>
 
     <div id="main-content">
         <h1>🎹 Trắc Nghiệm Cảm Âm</h1>
