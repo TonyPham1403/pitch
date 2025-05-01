@@ -111,11 +111,49 @@
         #next-btn {
             display: none;
         }
+
+        .dark-mode body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .white-key {
+            background: #ddd;
+            border-color: #888;
+        }
+
+        .dark-mode .white-key:active {
+            background-color: #bbb;
+        }
+
+        .dark-mode .black-key {
+            background: #222;
+        }
+
+        .dark-mode .black-key:active {
+            background-color: #444;
+        }
+
+        .dark-mode #start-btn,
+        .dark-mode #repeat-btn,
+        .dark-mode #prev-btn,
+        .dark-mode #next-btn {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .dark-mode #start-btn:hover,
+        .dark-mode #repeat-btn:hover,
+        .dark-mode #prev-btn:hover,
+        .dark-mode #next-btn:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 
 <body>
-    <h1>🎹 Trắc Nghiệm Cảm Âm</h1>
+    <h1>🎹 Trắc Nghiệm Cảm Âm<button id="toggle-darkmode">🌙 Dark Mode</button>
+    </h1>
     <div id="score-display">Điểm: 0 / 0 (0%)</div>
     <div id="status"></div>
 
@@ -438,6 +476,20 @@
             document.getElementById('prev-btn').style.display = currentIndex > 0 ? 'inline-block' : 'none';
             document.getElementById('next-btn').style.display = currentIndex < questionHistory.length - 1 ? 'inline-block' : 'none';
         }
+
+
+        document.getElementById("toggle-darkmode").addEventListener("click", function () {
+            document.documentElement.classList.toggle("dark-mode");
+
+            // Đổi biểu tượng nút khi bật/tắt
+            const btn = document.getElementById("toggle-darkmode");
+            if (document.documentElement.classList.contains("dark-mode")) {
+                btn.textContent = "☀️ Light Mode";
+            } else {
+                btn.textContent = "🌙 Dark Mode";
+            }
+        });
+
 
     </script>
 </body>
